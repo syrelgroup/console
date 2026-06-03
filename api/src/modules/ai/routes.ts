@@ -6,7 +6,7 @@ const upload = multer({ storage: storage });
 
 const router = Router();
 
-router.post("/ocr", upload.single("file"), Repo.GETOCR);
-router.post("/summary", upload.single("file"), Repo.GETSUMMARY);
+router.post("/kop/ocr", upload.single("file"), Repo.GETOCR);
+router.post("/kop/summary", upload.single("file"), Repo.GETSUMMARY);
 
 export default router;

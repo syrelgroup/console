@@ -22,9 +22,9 @@ app.use(
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-app.use("/auth", authRoute);
-app.use("/activities", middleware, activityRoute);
-app.use("/ai", aiRoute);
+app.use("/api/auth", authRoute);
+app.use("/api/activities", middleware, activityRoute);
+app.use("/api/ai", aiRoute);
 
 const PORT = process.env.APP_PORT || 5000;
 app.listen(PORT, () => {
