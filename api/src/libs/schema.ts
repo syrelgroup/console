@@ -27,7 +27,8 @@ export const ocrschema = {
   current_province: "provinsi pemohon sesuai domisili",
   current_pos_code: "kodepos pemohon sesuai domisili",
   phone: "no telepon pemohon",
-  education: "pendidikan pemohon sesuai KK",
+  education:
+    "pendidikan pemohon sesuai KK dengan format [TIDAK TAMAT SD/SEDERAJAT/SMP/SMA/D3/S1/S2/S3/LAINNYA]",
   marriage_status: "status kawin di KTP. (LAJANG/KAWIN/JANDA/DUDA",
   salary: "number ambil gaji takehomepay di IBPB",
   mothername: "nama ibu kandung di KK",
@@ -51,23 +52,32 @@ export const ocrschema = {
   aw_phone: "no telepon ahliwaris",
   aw_relate:
     "hubungan keluarga pemoon dengan ahliwaris pada form pengajuan kredit",
-  family_name: "nama keluarga tidak serumah pada form pengajuan kredit",
-  family_address: "alamat keluarga tidak serumah pada form pengajuan kredit",
-  family_rt: "rt keluarga tidak serumah pada form pengajuan kredit",
-  family_rw: "rw keluarga tidak serumah pada form pengajuan kredit",
-  family_ward: "kelurahan keluarga tidak serumah pada form pengajuan kredit",
+  family_name:
+    "nama keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+  family_address:
+    "alamat keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+  family_rt:
+    "rt keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+  family_rw:
+    "rw keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+  family_ward:
+    "kelurahan keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
   family_district:
-    "kecamatan keluarga tidak serumah pada form pengajuan kredit",
-  family_city: "kota keluarga tidak serumah pada form pengajuan kredit",
-  family_province: "provinsi keluarga tidak serumah pada form pengajuan kredit",
-  family_pos_code: "kode pos keluarga tidak serumah pada form pengajuan kredit",
-  family_phone: "no telepon keluarga tidak serumah pada form pengajuan kredit",
+    "kecamatan keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+  family_city:
+    "kota keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+  family_province:
+    "provinsi keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+  family_pos_code:
+    "kode pos keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+  family_phone:
+    "no telepon keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
   family_relate:
-    "hubungan keluarga pemohon dengan keluarga tidak serumah pada form pengajuan kredit (jika lainnya maka isi dengan data yang sesuai)",
+    "hubungan keluarga pemohon dengan keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah (jika lainnya maka isi dengan data yang sesuai)",
   npwp: "nomor npwp pemohon sesuai format aslinya",
   work_year: "masa kerja sesuai SK Pensiun pemohon (isi 0 jika tidak ada)",
   house_status:
-    "status kepemilihan rumah pada form pengajuan kredit (MILIK_SENDIRI/SEWA/KONTRAK/KOS/MILIK_KELUARGA)",
+    "status kepemilihan rumah pada form pengajuan kredit (TIDAK PUNYA RUMAH/MILIK SENDIRI/SEWA/MILIK KELUARGA/LAINNYA)",
   house_year: "tahun menempati rumah pada form pengajuan kredit",
   curr_job: "pekerjaan saat ini sesuai KTP",
   purpose_use: "RENOVASI RUMAH",

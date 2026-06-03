@@ -18,7 +18,7 @@ export async function ExtractDocument(fileBuffer: Buffer) {
       contentType: "application/octet-stream",
       body: fileBuffer,
       queryParameters: {
-        features: ["ocrHighResolution", "keyValuePairs"],
+        features: ["keyValuePairs"],
       },
     });
 
