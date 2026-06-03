@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum EDataStatus {
+  ALL
+  PRIVATE
+}
+
+model Role {
+  id          String      @id @default(uuid())
+  name        String
+  permission  String      @db.Text
+  data_status EDataStatus @default(ALL)
+
+  status     Boolean     @default(true)
+  created_at DateTime    @default(now())
+  updated_at DateTime    @default(now())
+  ClientApps ClientApp[]
+}
+
+model ClientApp {
+  id              String  @id @default(uuid())
+  fullname        String
+  phone           String? @unique
+  email           String?
+  username        String  @unique
+  password        String
+  company_name    String?
+  company_phone   String?
+  company_email   String?
+  company_address String?
+  api_key         String? @unique
+
+  status              Boolean              @default(true)
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @default(now())
+  Role                Role                 @relation(fields: [roleId], references: [id], onUpdate: Cascade)
+  roleId              String
+  ClientOrigins       ClientOrigin[]
+  ClientSubscriptions ClientSubscription[]
+  LogActivities       LogActivities[]
+}
+
+model ClientOrigin {
+  id     String @id @default(uuid())
+  name   String
+  origin String
+
+  status      Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+  ClientApp   ClientApp @relation(fields: [clientAppId], references: [id])
+  clientAppId String
+}
+
+model ClientSubscription {
+  id         String   @id @default(uuid())
+  status     Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  Subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  ClientApp      ClientApp    @relation(fields: [clientAppId], references: [id])
+  subscriptionId String
+  clientAppId    String
+  Invoices       Invoice[]
+}
+
+model Subscription {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  benefit     String  @db.Text
+  price       Int
+  limit       Int
+  description String? @db.Text
+  endpoint    String  @db.Text
+
+  status              Boolean              @default(true)
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @default(now())
+  ClientSubscriptions ClientSubscription[]
+  Endpoint            Endpoint[]
+}
+
+model Endpoint {
+  id           String         @id @default(uuid())
+  name         String
+  path         String         @unique
+  Subscription Subscription[]
+}
+
+model Invoice {
+  id          String    @id @default(uuid())
+  inv_date    DateTime  @default(now())
+  paid_date   DateTime?
+  paid_status Boolean   @default(false)
+  method      String?
+  amount      Int       @default(0)
+
+  status               Boolean            @default(true)
+  created_at           DateTime           @default(now())
+  updated_at           DateTime           @default(now())
+  ClientSubscription   ClientSubscription @relation(fields: [clientSubscriptionId], references: [id])
+  clientSubscriptionId String
+}
+
+model LogActivities {
+  id        String @id @default(uuid())
+  path      String
+  method    String
+  status    String
+  ip        String
+  userAgent String
+
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @default(now())
+  ClientApp   ClientApp? @relation(fields: [clientAppId], references: [id])
+  clientAppId String?
+}
