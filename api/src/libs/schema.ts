@@ -30,7 +30,7 @@ export const ocrschema = {
   education:
     "pendidikan pemohon sesuai KK dengan format [TIDAK TAMAT SD/SEDERAJAT/SMP/SMA/D3/S1/S2/S3/LAINNYA]",
   marriage_status: "status kawin di KTP. (LAJANG/KAWIN/JANDA/DUDA",
-  salary: "number ambil gaji takehomepay di IBPB",
+  salary: "number ambil gaji takehomepay di IDPB atau gaji di simulasi kredit",
   mothername: "nama ibu kandung di KK",
   aw_name: "nama ahliwaris sesuai KTP Ahliwaris",
   aw_nik: "nik ahliwaris sesuai KTP Ahliwaris",
@@ -51,51 +51,53 @@ export const ocrschema = {
   aw_pos_code: "kodepos ahliwaris sesuai KK Ahliwaris/Pemohon",
   aw_phone: "no telepon ahliwaris",
   aw_relate:
-    "hubungan keluarga pemoon dengan ahliwaris pada form pengajuan kredit",
+    "hubungan keluarga pemoon dengan ahliwaris pada form pengajuan kredit/Data Tambahan",
   family_name:
-    "nama keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "nama keluarga tidak serumah pada form pengajuan kredit/Data Tambahanh",
   family_address:
-    "alamat keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "alamat keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_rt:
-    "rt keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "rt keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_rw:
-    "rw keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "rw keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_ward:
-    "kelurahan keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "kelurahan keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_district:
-    "kecamatan keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "kecamatan keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_city:
-    "kota keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "kota keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_province:
-    "provinsi keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "provinsi keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_pos_code:
-    "kode pos keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "kode pos keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_phone:
-    "no telepon keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah",
+    "no telepon keluarga tidak serumah pada form pengajuan kredit/Data Tambahan",
   family_relate:
-    "hubungan keluarga pemohon dengan keluarga tidak serumah pada form pengajuan kredit/keluarga tidak serumah (jika lainnya maka isi dengan data yang sesuai)",
+    "hubungan keluarga pemohon dengan keluarga tidak serumah pada form pengajuan kredit/Data Tambahan (jika lainnya maka isi dengan data yang sesuai)",
   npwp: "nomor npwp pemohon sesuai format aslinya",
-  work_year: "masa kerja sesuai SK Pensiun pemohon (isi 0 jika tidak ada)",
+  work_year:
+    "masa kerja sesuai SK Pensiun/Data Tambahan pemohon (isi 0 jika tidak ada)",
   house_status:
-    "status kepemilihan rumah pada form pengajuan kredit (TIDAK PUNYA RUMAH/MILIK SENDIRI/SEWA/MILIK KELUARGA/LAINNYA)",
-  house_year: "tahun menempati rumah pada form pengajuan kredit",
+    "status kepemilihan rumah pada form pengajuan kredit/Data Tambahan (TIDAK PUNYA RUMAH/MILIK SENDIRI/SEWA/MILIK KELUARGA/LAINNYA)",
+  house_year: "tahun menempati rumah pada form pengajuan kredit/Data Tambahan",
   curr_job: "pekerjaan saat ini sesuai KTP",
-  purpose_use: "RENOVASI RUMAH",
+  purpose_use: "Tujuan penggunaan di Form permohonan kredit/Data Tambahan",
   business: "LAINNYA",
-  nopen: "nomor pensiun pada IDPB/SK Pensiun",
-  no_skep: "nomor SK Pensiun pensiun pada IDPB/SK Pensiun",
-  name_skep: "nama sesuai IDPB/SK Pensiun",
-  date_skep: "tanggal SK pensiun sesuai IDPB/SK Pensiun format YYYY-MM-DD",
-  tmt_skep: "TMT Pensiun  sesuai IDPB/SK Pensiun",
-  soul_code: "kode jiwa sesuai IDPB/SK Pensiun",
-  rank_skep: "pangkat sesuai IDPB/SK Pensiun",
-  publisher_skep: "penerbi SK Pensiun sesuai IDPB/SK Pensiun",
+  nopen: "nomor pensiun pada IDPB/SK Pensiun/Data Tambahan",
+  no_skep: "nomor SK Pensiun pensiun pada IDPB/SK Pensiun/Data Tambahan",
+  name_skep: "nama sesuai IDPB/SK Pensiun/Data Tambahan",
+  date_skep:
+    "tanggal SK pensiun sesuai IDPB/SK Pensiun/Data Tambahan format YYYY-MM-DD",
+  tmt_skep: "TMT Pensiun  sesuai IDPB/SK Pensiun/Data Tambahan",
+  soul_code: "kode jiwa sesuai IDPB/SK Pensiun/Data Tambahan",
+  rank_skep: "pangkat sesuai IDPB/SK Pensiun/Data Tambahan",
+  publisher_skep: "penerbi SK Pensiun sesuai IDPB/SK Pensiun/Data Tambahan",
   group_skep:
-    "Kelompok/pengelola pensiun sesuai IDPB/SK Pensiun/Form Pengajuan Kredit",
-  pay_office: "juru bayar asal sesuai IDPB/Form pengajuan kredit",
-  mutasi_to: "juru bayar tujuan sesuai Form pengajuan kredit",
+    "Kelompok/pengelola pensiun sesuai IDPB/SK Pensiun/Form Pengajuan Kredit/Data Tambahan",
+  pay_office: "juru bayar asal sesuai IDPB/Form pengajuan kredit/Data Tambahan",
+  mutasi_to: "juru bayar tujuan sesuai Form pengajuan kredit/Data Tambahan",
   instansi_takeover:
-    "nama instansi sesuai Form pengajuan kredit bagian DATA PEMBIAYAAN DI LEMBAGA KEUANGAN LAINNYA (pisahkan dengan , jika lebih dari satu)",
+    "nama instansi sesuai Form pengajuan kredit/Data Tambahan bagian DATA PEMBIAYAAN DI LEMBAGA KEUANGAN LAINNYA (pisahkan dengan , jika lebih dari satu)",
   nominal_takeover:
-    "number jumlah sisa pinjaman sesuai Form pengajuan kredit bagian DATA PEMBIAYAAN DI LEMBAGA KEUANGAN ILAINNYA",
+    "number jumlah sisa pinjaman sesuai Form pengajuan kredit/Data Tambahan bagian DATA PEMBIAYAAN DI LEMBAGA KEUANGAN ILAINNYA",
 };
