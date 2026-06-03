@@ -34,7 +34,7 @@ export const GETSUMMARY = async (req: Request, res: Response) => {
   try {
     const rawdata = await ExtractDocument(req.file.buffer);
     const ocrData = await GetOCRDocument(rawdata);
-    const summaryData = GetVerifSummary(ocrData, JSON.parse(user_input));
+    const summaryData = await GetVerifSummary(ocrData, JSON.parse(user_input));
 
     return ResponseServer(res, 200, { msg: "OK", data: summaryData });
   } catch (error) {

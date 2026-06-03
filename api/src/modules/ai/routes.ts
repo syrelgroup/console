@@ -2,7 +2,10 @@ import { Router } from "express";
 import * as Repo from "./repositories.js";
 import multer from "multer";
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 100 * 1024 * 1024 },
+});
 
 const router = Router();
 
