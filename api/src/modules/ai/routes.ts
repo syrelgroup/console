@@ -10,6 +10,7 @@ const upload = multer({
 const router = Router();
 
 router.post("/kop/ocr", upload.single("file"), Repo.GETOCR);
-router.post("/kop/summary", upload.single("file"), Repo.GETSUMMARY);
+router.post("/kop/summary", upload.single("file"), Repo.GETVERIFYSUMMARY);
+router.post("/bank/slik", upload.single("file"), Repo.GETSLIKSUMMARY);
 
 export default router;
