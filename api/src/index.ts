@@ -1,10 +1,8 @@
 import "dotenv/config";
 import cors from "cors";
 import express from "express";
-import authRoute from "./modules/auth/routes.js";
-import activityRoute from "./modules/activity/routes.js";
-import aiRoute from "./modules/ai/routes.js";
-import { middleware } from "./libs/util.js";
+
+import aiRoute from "./routes/ai/routes.js";
 
 const app = express();
 
@@ -22,8 +20,6 @@ app.use(
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
-app.use("/api/auth", authRoute);
-app.use("/api/activities", middleware, activityRoute);
 app.use("/api/ai", aiRoute);
 
 const PORT = process.env.APP_PORT || 5000;

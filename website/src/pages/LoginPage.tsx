@@ -56,7 +56,7 @@ export default function LoginPage() {
           {/* Slogan / Nilai Jual Utama */}
           <div className="relative z-10 my-auto max-w-xl">
             <span className="text-blue-400 text-xs font-bold uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20">
-              Console {import.meta.env.VITE_APP_VERSION}
+              Automatic Trade {import.meta.env.VITE_APP_VERSION}
             </span>
             <h1 className="text-white text-4xl xl:text-5xl font-extrabold tracking-tight mt-6 leading-[1.15]">
               Kelola ekosistem digital Anda dalam satu genggaman.

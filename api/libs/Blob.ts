@@ -2,32 +2,10 @@ import {
   BlobServiceClient,
   StorageSharedKeyCredential,
 } from "@azure/storage-blob";
-import { AzureOpenAI } from "openai";
-import DocumentIntelligence from "@azure-rest/ai-document-intelligence";
 
 const storage_account = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
 const storage_accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
 const storage_containerName = process.env.AZURE_STORAGE_CONTAINER_NAME!;
-
-export const open_ai_model = process.env.OPEN_AI_MODEL!;
-const open_ai_endpoint = process.env.OPEN_AI_ENDPOINT!;
-const open_ai_key = process.env.OPEN_AI_KEY!;
-const open_ai_version = process.env.OPEN_AI_VERSION!;
-
-const doc_endpoint = process.env.DOC_AI_ENDPOINT!;
-const doc_key = process.env.DOC_AI_KEY!;
-
-// AI
-export const aiClient = new AzureOpenAI({
-  endpoint: open_ai_endpoint,
-  apiKey: open_ai_key,
-  apiVersion: open_ai_version,
-});
-
-// DOCUMENT
-export const docClient = DocumentIntelligence(doc_endpoint, {
-  key: doc_key,
-});
 
 // BLOB STORAGE
 let blobServiceClient: BlobServiceClient | null = null;
