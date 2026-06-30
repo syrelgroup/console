@@ -236,6 +236,7 @@ const FacilitiesTable: React.FC<{ data: IFacilities[] }> = ({ data }) => {
       size="small"
       pagination={data.length > 8 ? { pageSize: 8 } : false}
       className="mt-2"
+      scroll={{ x: true }}
     />
   );
 };

@@ -61,7 +61,7 @@ export const RuleProblemFacilities = (
     };
   return {
     status: true,
-    msg: `Terdapat Kredit bermasalah masih wajar (${data.summary.problem_facilities_noa}) < ${max}, dengan outstanding ${data.summary.problem_facilities_os}`,
+    msg: `Tidak Terdapat Kredit bermasalah`,
     score,
   };
 };
