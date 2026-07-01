@@ -35,13 +35,13 @@ import {
   Landmark,
   Printer,
 } from "lucide-react";
-import { IFacilities, ISlikResult } from "../libs/IInterfaces";
+import { IFacilities, IRuleResult, ISlikResult } from "../libs/IInterfaces";
 import { printAnalyzeSlik } from "../components/pdfs/printSlikAnalyze";
 
 export interface ApiResponse {
   msg: string;
   data: ISlikResult;
-  rulesmessage: string[];
+  rulesmessage: IRuleResult[];
   score: number;
 }
 
@@ -277,7 +277,7 @@ export const SlikAnalyzer: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 text-gray-800 dark:text-gray-200">
       {/* Header Banner */}
-      <div className="text-center py-8 bg-gradient-to-r from-blue-50/50 via-indigo-50/50 to-blue-50/50 dark:from-zinc-800/40 dark:via-zinc-800/60 dark:to-zinc-800/40 rounded-2xl border border-blue-100 dark:border-zinc-700 shadow-sm mb-4">
+      <div className="text-center py-8 bg-linear-to-r from-blue-50/50 via-indigo-50/50 to-blue-50/50 dark:from-zinc-800/40 dark:via-zinc-800/60 dark:to-zinc-800/40 rounded-2xl border border-blue-100 dark:border-zinc-700 shadow-sm mb-4">
         <FileSearch className="w-14 h-14 mx-auto text-blue-600 dark:text-blue-400 mb-3" />
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
           SLIK Credit Scoring Analyzer
@@ -599,16 +599,13 @@ export const SlikAnalyzer: React.FC = () => {
           >
             <div className="space-y-3">
               {result.rulesmessage && result.rulesmessage.length > 0 ? (
-                result.rulesmessage.map((msg, index) => {
-                  if (!msg) return null;
-                  const isNegative =
-                    msg.toLowerCase().includes("macet") ||
-                    msg.toLowerCase().includes("tunggakan") ||
-                    msg.toLowerCase().includes("melebihi");
+                result.rulesmessage.map((rule, index) => {
+                  if (!rule) return null;
+                  const isNegative = !rule.status;
                   return (
                     <Alert
                       key={index}
-                      message={msg}
+                      message={rule.msg}
                       type={isNegative ? "warning" : "info"}
                       showIcon
                       icon={

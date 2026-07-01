@@ -34,7 +34,7 @@ export const GETSLIKSUMMARY = async (req: Request, res: Response) => {
     return ResponseServer(res, 200, {
       msg: "OK",
       data: summaryData,
-      rulesmessage: result.map((r) => r?.msg),
+      rulesmessage: result,
       score: score > 100 ? 100 : score,
     });
   } catch (error) {

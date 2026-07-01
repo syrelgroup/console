@@ -1,5 +1,5 @@
 // src/components/pdfs/printSlikAnalyze.ts
-import { IFacilities, ISlikResult } from "../../libs/IInterfaces";
+import { IFacilities, IRuleResult, ISlikResult } from "../../libs/IInterfaces";
 
 const formatRp = (val: number) =>
   "Rp " + Number(val || 0).toLocaleString("id-ID");
@@ -93,14 +93,11 @@ const escapeHtml = (val: unknown) =>
 
 // Rule dengan indikasi negatif (tunggakan/macet/melebihi limit) ditandai merah,
 // selebihnya (informasi/positif) ditandai biru. Satu daftar bisa berisi campuran keduanya.
-const isNegativeRule = (msg: string) => {
-  const m = msg.toLowerCase();
-  return (
-    m.includes("macet") || m.includes("tunggakan") || m.includes("melebihi")
-  );
+const isNegativeRule = (rule: IRuleResult) => {
+  return !rule.status;
 };
 
-const generate = (record: ISlikResult, score: number, rules: string[]) => {
+const generate = (record: ISlikResult, score: number, rules: IRuleResult[]) => {
   const gradeInfo = getGradeInfo(score);
   const summary = record.summary;
   const facilities: IFacilities[] = record.facilities || [];
@@ -564,7 +561,7 @@ const generate = (record: ISlikResult, score: number, rules: string[]) => {
               .filter(Boolean)
               .map(
                 (r) =>
-                  `<li class="${isNegativeRule(r) ? "item-danger" : "item-info"}">${escapeHtml(r)}</li>`,
+                  `<li class="${isNegativeRule(r) ? "item-danger" : "item-info"}">${escapeHtml(r.msg)}</li>`,
               )
               .join("")}
         </ul>
@@ -589,7 +586,7 @@ const generate = (record: ISlikResult, score: number, rules: string[]) => {
 export const printAnalyzeSlik = (
   record: ISlikResult,
   score: number,
-  rules: string[],
+  rules: IRuleResult[],
 ) => {
   const htmlContent = generate(record, score, rules);
   const w = window.open("", "_blank");
