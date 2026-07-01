@@ -17,6 +17,7 @@ import {
   Empty,
   Tooltip,
   Divider,
+  theme, // Tetap diperlukan untuk properti internal seperti internal strokeColor Progress
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -32,59 +33,10 @@ import {
   Wallet,
   Calendar,
   Landmark,
+  Printer,
 } from "lucide-react";
-
-// Define TypeScript interfaces based on backend output
-export interface IDebitur {
-  fullname: string | null;
-  nik: string | null;
-  gender: string | null;
-  birthplace: string | null;
-  birthdate: string | null;
-  npwp: string | null;
-  address: string | null;
-}
-
-export interface IFacilities {
-  name: string;
-  os: number;
-  plafond: number;
-  condition: string;
-  start_at: string | null;
-  end_at: string | null;
-  collect: number;
-  status: boolean;
-}
-
-export interface ISummary {
-  collect: number;
-  total_plafond: number;
-  total_os: number;
-  total_facilities: number;
-  active_facilities_plafond: number;
-  active_facilities_os: number;
-  active_facilities_noa: number;
-  problem_facilities_plafond: number;
-  problem_facilities_os: number;
-  problem_facilities_noa: number;
-  inactive_facilities_plafond: number;
-  inactive_facilities_os: number;
-  inactive_facilities_noa: number;
-  paid_facilities_plafond: number;
-  paid_facilities_noa: number;
-}
-
-export interface ISlikResult {
-  debitur: IDebitur;
-  summary: ISummary;
-  facilities: IFacilities[];
-}
-
-export interface IRuleResult {
-  status: boolean;
-  msg: string;
-  score: number;
-}
+import { IFacilities, ISlikResult } from "../libs/IInterfaces";
+import { printAnalyzeSlik } from "../components/pdfs/printSlikAnalyze";
 
 export interface ApiResponse {
   msg: string;
@@ -134,6 +86,8 @@ const getGradeInfo = (score: number) => {
 // ---- Facilities table ---------------------------------------------------
 
 const FacilitiesTable: React.FC<{ data: IFacilities[] }> = ({ data }) => {
+  const { token } = theme.useToken(); // Mengambil token token antd agar warna bar internal singkron
+
   const columns: ColumnsType<IFacilities> = [
     {
       title: "Fasilitas",
@@ -143,10 +97,12 @@ const FacilitiesTable: React.FC<{ data: IFacilities[] }> = ({ data }) => {
         <div className="flex items-start gap-2">
           <Landmark className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
           <div>
-            <div className="font-medium text-gray-800">
+            <div className="font-medium text-gray-800 dark:text-gray-200">
               {name || "Tidak diketahui"}
             </div>
-            <div className="text-xs text-gray-400">{row.condition || "-"}</div>
+            <div className="text-xs text-gray-400 dark:text-gray-500">
+              {row.condition || "-"}
+            </div>
           </div>
         </div>
       ),
@@ -161,16 +117,22 @@ const FacilitiesTable: React.FC<{ data: IFacilities[] }> = ({ data }) => {
           row.plafond > 0 ? Math.min(100, (row.os / row.plafond) * 100) : 0;
         return (
           <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
               <span>{formatRp(row.os)}</span>
-              <span className="text-gray-300">/ {formatRp(row.plafond)}</span>
+              <span className="text-gray-300 dark:text-gray-600">
+                / {formatRp(row.plafond)}
+              </span>
             </div>
             <Progress
               percent={pct}
               showInfo={false}
               size="small"
               strokeColor={
-                pct > 80 ? "#ef4444" : pct > 50 ? "#f59e0b" : "#3b82f6"
+                pct > 80
+                  ? token.colorError
+                  : pct > 50
+                    ? token.colorWarning
+                    : token.colorPrimary
               }
             />
           </div>
@@ -209,7 +171,7 @@ const FacilitiesTable: React.FC<{ data: IFacilities[] }> = ({ data }) => {
       key: "periode",
       width: 190,
       render: (_, row) => (
-        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
           <Calendar className="w-3.5 h-3.5" />
           <span>
             {formatDate(row.start_at)} &rarr; {formatDate(row.end_at)}
@@ -245,11 +207,11 @@ const InfoField: React.FC<{ label: string; value: React.ReactNode }> = ({
   label,
   value,
 }) => (
-  <div className="bg-slate-50 rounded-lg p-3 border border-gray-100 min-w-0">
-    <div className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">
+  <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-gray-100 dark:border-zinc-700 min-w-0">
+    <div className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">
       {label}
     </div>
-    <div className="text-sm font-medium text-gray-800 wrap-break-word leading-snug">
+    <div className="text-sm font-medium text-gray-800 dark:text-gray-200 wrap-break-word leading-snug">
       {value}
     </div>
   </div>
@@ -300,10 +262,10 @@ export const SlikAnalyzer: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Spin size="large" />
-        <p className="mt-4 text-gray-600 font-medium">
+        <p className="mt-4 text-gray-600 dark:text-gray-300 font-medium">
           Mengekstrak & Menganalisis SLIK via OCR...
         </p>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-400 dark:text-gray-500">
           Proses ini memakan waktu 10-30 detik
         </p>
       </div>
@@ -313,31 +275,32 @@ export const SlikAnalyzer: React.FC = () => {
   const gradeInfo = result ? getGradeInfo(result.score) : null;
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 text-gray-800 dark:text-gray-200">
       {/* Header Banner */}
-      <div className="text-center py-8 bg-linear-to-r from-blue-50 via-indigo-50 to-blue-50 rounded-2xl border border-blue-100 shadow-sm mb-4">
-        <FileSearch className="w-14 h-14 mx-auto text-blue-600 mb-3" />
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+      <div className="text-center py-8 bg-gradient-to-r from-blue-50/50 via-indigo-50/50 to-blue-50/50 dark:from-zinc-800/40 dark:via-zinc-800/60 dark:to-zinc-800/40 rounded-2xl border border-blue-100 dark:border-zinc-700 shadow-sm mb-4">
+        <FileSearch className="w-14 h-14 mx-auto text-blue-600 dark:text-blue-400 mb-3" />
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
           SLIK Credit Scoring Analyzer
         </h1>
-        <p className="text-gray-500 max-w-xl mx-auto mt-1 text-sm sm:text-base">
+        <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-1 text-sm sm:text-base">
           Unggah salinan PDF SLIK OJK untuk mendapatkan visualisasi metrik
           finansial, deteksi risiko, dan penilaian kelayakan kredit instan.
         </p>
       </div>
 
       {!result && (
-        <Card className="max-w-xl mx-auto shadow-md rounded-xl border-dashed border-2">
+        <Card className="max-w-xl mx-auto shadow-md rounded-xl border-dashed border-2 dark:bg-zinc-900 dark:border-zinc-700">
           <Upload.Dragger
             accept=".pdf"
             customRequest={({ file }) => handleUpload(file as File)}
             showUploadList={false}
+            className="dark:bg-transparent"
           >
             <UploadCloud className="w-14 h-14 mx-auto text-blue-500 mb-3" />
-            <p className="text-lg font-semibold text-gray-700">
+            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
               Klik atau seret file SLIK ke sini
             </p>
-            <p className="text-gray-400 text-xs mt-1">
+            <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">
               Mendukung format PDF resmi dari OJK / iDeb
             </p>
           </Upload.Dragger>
@@ -360,10 +323,10 @@ export const SlikAnalyzer: React.FC = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={8}>
               <Card
-                className="text-center h-full shadow-sm flex flex-col justify-center items-center border-t-4"
+                className="text-center h-full shadow-sm flex flex-col justify-center items-center border-t-4 dark:bg-zinc-900 dark:border-zinc-700"
                 style={{ borderTopColor: gradeInfo.color }}
               >
-                <h3 className="text-gray-500 font-medium uppercase tracking-wider text-xs mb-4">
+                <h3 className="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs mb-4">
                   Kelayakan Kredit
                 </h3>
                 <Progress
@@ -378,7 +341,7 @@ export const SlikAnalyzer: React.FC = () => {
                       >
                         {gradeInfo.grade}
                       </div>
-                      <div className="text-sm font-semibold text-gray-500 mt-1">
+                      <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 mt-1">
                         {result.score} / 100
                       </div>
                     </div>
@@ -405,12 +368,12 @@ export const SlikAnalyzer: React.FC = () => {
             <Col xs={24} md={16}>
               <Card
                 title={
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200">
                     <User className="w-5 h-5 text-blue-500" />
                     <span>Informasi Debitur</span>
                   </div>
                 }
-                className="h-full shadow-sm"
+                className="h-full shadow-sm dark:bg-zinc-900 dark:border-zinc-700"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <InfoField
@@ -443,15 +406,19 @@ export const SlikAnalyzer: React.FC = () => {
           </Row>
 
           {/* Financial Breakdown Cards */}
-          <h2 className="text-xl font-bold text-gray-800 mt-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-blue-600" /> Ringkasan
-            Portofolio Kredit
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mt-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />{" "}
+            Ringkasan Portofolio Kredit
           </h2>
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} lg={6}>
-              <Card className="shadow-sm border-l-4 border-l-blue-500 bg-slate-50">
+              <Card className="shadow-sm border-l-4 border-l-blue-500 bg-slate-50 dark:bg-zinc-900 dark:border-zinc-700">
                 <Statistic
-                  title="Total Plafon Seluruhnya"
+                  title={
+                    <span className="dark:text-gray-400">
+                      Total Plafon Seluruhnya
+                    </span>
+                  }
                   value={result.data.summary.total_plafond}
                   precision={0}
                   prefix={
@@ -463,9 +430,13 @@ export const SlikAnalyzer: React.FC = () => {
               </Card>
             </Col>
             <Col xs={24} sm={12} lg={6}>
-              <Card className="shadow-sm border-l-4 border-l-indigo-500 bg-slate-50">
+              <Card className="shadow-sm border-l-4 border-l-indigo-500 bg-slate-50 dark:bg-zinc-900 dark:border-zinc-700">
                 <Statistic
-                  title="Total Baki Debet (OS)"
+                  title={
+                    <span className="dark:text-gray-400">
+                      Total Baki Debet (OS)
+                    </span>
+                  }
                   value={result.data.summary.total_os}
                   precision={0}
                   formatter={(v) => formatRp(Number(v))}
@@ -474,9 +445,13 @@ export const SlikAnalyzer: React.FC = () => {
               </Card>
             </Col>
             <Col xs={24} sm={12} lg={6}>
-              <Card className="shadow-sm border-l-4 border-l-green-500 bg-slate-50">
+              <Card className="shadow-sm border-l-4 border-l-green-500 bg-slate-50 dark:bg-zinc-900 dark:border-zinc-700">
                 <Statistic
-                  title="Fasilitas Lunas (NOA)"
+                  title={
+                    <span className="dark:text-gray-400">
+                      Fasilitas Lunas (NOA)
+                    </span>
+                  }
                   value={result.data.summary.paid_facilities_noa}
                   suffix="Kontrak"
                   valueStyle={{
@@ -485,12 +460,17 @@ export const SlikAnalyzer: React.FC = () => {
                     color: "#22c55e",
                   }}
                 />
-              </Card>
+              </Card>{" "}
+              {/* <-- SEBELUMNYA DI SINI SALAH TULIS MENJADI </Col> */}
             </Col>
             <Col xs={24} sm={12} lg={6}>
-              <Card className="shadow-sm border-l-4 border-l-red-500 bg-slate-50">
+              <Card className="shadow-sm border-l-4 border-l-red-500 bg-slate-50 dark:bg-zinc-900 dark:border-zinc-700">
                 <Statistic
-                  title="Plafon Kredit Macet"
+                  title={
+                    <span className="dark:text-gray-400">
+                      Plafon Kredit Macet
+                    </span>
+                  }
                   value={result.data.summary.problem_facilities_plafond}
                   precision={0}
                   formatter={(v) => formatRp(Number(v))}
@@ -505,7 +485,14 @@ export const SlikAnalyzer: React.FC = () => {
           </Row>
 
           {/* Tabular Analysis Strategy (Active vs Problem vs Inactive) + Facility lists */}
-          <Card className="shadow-sm" title="Segmentasi & Daftar Fasilitas">
+          <Card
+            className="shadow-sm dark:bg-zinc-900 dark:border-zinc-700"
+            title={
+              <span className="dark:text-gray-200">
+                Segmentasi & Daftar Fasilitas
+              </span>
+            }
+          >
             <Tabs defaultActiveKey="active" type="card">
               <Tabs.TabPane
                 tab={
@@ -603,8 +590,12 @@ export const SlikAnalyzer: React.FC = () => {
 
           {/* Rule Messages & System Findings */}
           <Card
-            title="Hasil Aturan (Rules Validation) & Catatan Risiko"
-            className="shadow-sm border-gray-200"
+            title={
+              <span className="dark:text-gray-200">
+                Hasil Aturan (Rules Validation) & Catatan Risiko
+              </span>
+            }
+            className="shadow-sm border-gray-200 dark:bg-zinc-900 dark:border-zinc-700"
           >
             <div className="space-y-3">
               {result.rulesmessage && result.rulesmessage.length > 0 ? (
@@ -632,13 +623,35 @@ export const SlikAnalyzer: React.FC = () => {
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-sm">
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
                   Tidak ada catatan pelanggaran rule spesifik.
                 </p>
               )}
             </div>
           </Card>
 
+          {/* Bottom Printing Area */}
+          <div className="my-4 flex justify-between items-center p-4 rounded-xl border border-gray-100 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xs">
+            <div>
+              <h2 className="text-lg font-bold m-0 text-gray-800 dark:text-gray-200">
+                Hasil Analisis Valid
+              </h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500 m-0">
+                Data siap dicetak ke format dokumen fisik / PDF
+              </p>
+            </div>
+            <Button
+              type="primary"
+              icon={<Printer className="w-4 h-4" />}
+              size="large"
+              className="bg-emerald-600 hover:bg-emerald-700 border-none flex items-center gap-2"
+              onClick={() =>
+                printAnalyzeSlik(result.data, result.score, result.rulesmessage)
+              }
+            >
+              Cetak Hasil Analisa SLIK
+            </Button>
+          </div>
           {/* Bottom Action Trigger */}
           <div className="text-center pt-4">
             <Tooltip title="Reset hasil dan unggah file SLIK lainnya">
