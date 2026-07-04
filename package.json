@@ -1,0 +1,19 @@
+{
+  "name": "syrel-console-app",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "api",
+    "website",
+    "shared"
+  ],
+  "scripts": {
+    "dev:ui": "npm run dev -w syrel_console_ui",
+    "dev:api": "npm run dev -w syrel_console_api",
+    "build:ui": "npm run build -w syrel_console_ui",
+    "build:api": "npm run build -w syrel_console_api",
+    "dev:all": "npm run dev -w syrel_console_api && npm run dev -w syrel_console_ui",
+    "build:all": "npm run build -w syrel_console_api && npm run build -w syrel_console_ui",
+    "execute:all": "npm run build:all && pm2 restart syrel-console"
+  }
+}

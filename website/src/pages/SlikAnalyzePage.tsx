@@ -35,7 +35,7 @@ import {
   Landmark,
   Printer,
 } from "lucide-react";
-import { IFacilities, IRuleResult, ISlikResult } from "../libs/IInterfaces";
+import { IFacilities, IRuleResult, ISlikResult } from "@syrel/shared";
 import { printAnalyzeSlik } from "../components/pdfs/printSlikAnalyze";
 
 export interface ApiResponse {
@@ -48,7 +48,7 @@ export interface ApiResponse {
 // ---- Helpers ----------------------------------------------------------
 
 const formatRp = (value: number | null | undefined) =>
-  `Rp ${Number(value ?? 0).toLocaleString("id-ID")}`;
+  `Rp ${Number(value?.toFixed(2) ?? 0).toLocaleString("id-ID")}`;
 
 const formatDate = (value: string | null) => {
   if (!value) return "-";
@@ -100,9 +100,6 @@ const FacilitiesTable: React.FC<{ data: IFacilities[] }> = ({ data }) => {
             <div className="font-medium text-gray-800 dark:text-gray-200">
               {name || "Tidak diketahui"}
             </div>
-            <div className="text-xs text-gray-400 dark:text-gray-500">
-              {row.condition || "-"}
-            </div>
           </div>
         </div>
       ),
@@ -110,7 +107,6 @@ const FacilitiesTable: React.FC<{ data: IFacilities[] }> = ({ data }) => {
     {
       title: "Plafon / Outstanding",
       key: "amount",
-      width: 220,
       sorter: (a, b) => a.os - b.os,
       render: (_, row) => {
         const pct =
@@ -140,36 +136,48 @@ const FacilitiesTable: React.FC<{ data: IFacilities[] }> = ({ data }) => {
       },
     },
     {
-      title: "Kolektibilitas",
-      dataIndex: "collect",
-      key: "collect",
-      width: 170,
-      filters: Object.entries(COLLECT_INFO).map(([k, v]) => ({
-        text: v.label,
-        value: Number(k),
-      })),
-      onFilter: (value, row) => row.collect === value,
-      sorter: (a, b) => a.collect - b.collect,
-      render: (collect: number) => {
-        const info = getCollectInfo(collect);
-        return <Tag color={info.color}>{info.label}</Tag>;
-      },
+      title: "Angsuran",
+      dataIndex: "angsuran",
+      key: "angsuran",
+      render: (_, record) => (
+        <div>
+          <div>
+            <Tag>
+              {record.interest_rate}% {record.interest_type}
+            </Tag>
+          </div>
+          <div>
+            <Tag color={"blue"}>{formatRp(record.installment || 0)}</Tag>
+          </div>
+        </div>
+      ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 110,
-      render: (status: boolean) => (
-        <Tag color={status ? "cyan" : "default"}>
-          {status ? "Aktif" : "Non-Aktif"}
-        </Tag>
+      render: (status: boolean, record) => (
+        <div>
+          <Tag
+            color={
+              record.collect === 2
+                ? "blue"
+                : record.collect > 2
+                  ? "red"
+                  : "green"
+            }
+          >
+            Kol {record.collect} {record.collect_label}
+          </Tag>
+          <Tag color={status ? "cyan" : "default"}>
+            {status ? "Aktif" : "Non-Aktif"}
+          </Tag>
+        </div>
       ),
     },
     {
       title: "Periode",
       key: "periode",
-      width: 190,
       render: (_, row) => (
         <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
           <Calendar className="w-3.5 h-3.5" />
@@ -249,14 +257,28 @@ export const SlikAnalyzer: React.FC = () => {
 
   const facilities = result?.data?.facilities ?? [];
 
-  const { activeFacilities, problemFacilities, inactiveFacilities } =
-    useMemo(() => {
-      return {
-        activeFacilities: facilities.filter((f) => f.status === true),
-        problemFacilities: facilities.filter((f) => f.collect >= 3),
-        inactiveFacilities: facilities.filter((f) => f.status === false),
-      };
-    }, [facilities]);
+  const {
+    activeFacilities,
+    problemFacilities,
+    inactiveFacilities,
+    nplPercentage,
+  } = useMemo(() => {
+    const active = facilities.filter((f) => f.status === true);
+    const problem = facilities.filter((f) => f.collect >= 3);
+    const inactive = facilities.filter((f) => f.status === false);
+
+    // Kalkulasi NPL: (Total OS Fasilitas Macet / Total OS Seluruh Fasilitas) * 100
+    const totalOS = facilities.reduce((sum, f) => sum + f.os, 0);
+    const problemOS = problem.reduce((sum, f) => sum + f.os, 0);
+    const npl = totalOS > 0 ? (problemOS / totalOS) * 100 : 0;
+
+    return {
+      activeFacilities: active,
+      problemFacilities: problem,
+      inactiveFacilities: inactive,
+      nplPercentage: npl,
+    };
+  }, [facilities]);
 
   if (loading) {
     return (
@@ -277,16 +299,18 @@ export const SlikAnalyzer: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 text-gray-800 dark:text-gray-200">
       {/* Header Banner */}
-      <div className="text-center py-8 bg-linear-to-r from-blue-50/50 via-indigo-50/50 to-blue-50/50 dark:from-zinc-800/40 dark:via-zinc-800/60 dark:to-zinc-800/40 rounded-2xl border border-blue-100 dark:border-zinc-700 shadow-sm mb-4">
-        <FileSearch className="w-14 h-14 mx-auto text-blue-600 dark:text-blue-400 mb-3" />
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-          SLIK Credit Scoring Analyzer
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-1 text-sm sm:text-base">
-          Unggah salinan PDF SLIK OJK untuk mendapatkan visualisasi metrik
-          finansial, deteksi risiko, dan penilaian kelayakan kredit instan.
-        </p>
-      </div>
+      {!result && (
+        <div className="text-center py-8 bg-linear-to-r from-blue-50/50 via-indigo-50/50 to-blue-50/50 dark:from-zinc-800/40 dark:via-zinc-800/60 dark:to-zinc-800/40 rounded-2xl border border-blue-100 dark:border-zinc-700 shadow-sm mb-4">
+          <FileSearch className="w-14 h-14 mx-auto text-blue-600 dark:text-blue-400 mb-3" />
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+            SLIK Credit Scoring Analyzer
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-1 text-sm sm:text-base">
+            Unggah salinan PDF SLIK OJK untuk mendapatkan visualisasi metrik
+            finansial, deteksi risiko, dan penilaian kelayakan kredit instan.
+          </p>
+        </div>
+      )}
 
       {!result && (
         <Card className="max-w-xl mx-auto shadow-md rounded-xl border-dashed border-2 dark:bg-zinc-900 dark:border-zinc-700">
@@ -416,14 +440,12 @@ export const SlikAnalyzer: React.FC = () => {
                 <Statistic
                   title={
                     <span className="dark:text-gray-400">
-                      Total Plafon Seluruhnya
+                      <Wallet className="w-4 h-4 inline mr-1 -mt-1 text-blue-500" />{" "}
+                      Total Plafon
                     </span>
                   }
                   value={result.data.summary.total_plafond}
                   precision={0}
-                  prefix={
-                    <Wallet className="w-4 h-4 inline mr-1 -mt-1 text-blue-500" />
-                  }
                   formatter={(v) => formatRp(Number(v))}
                   valueStyle={{ fontSize: "1.25rem", fontWeight: "bold" }}
                 />
@@ -478,6 +500,21 @@ export const SlikAnalyzer: React.FC = () => {
                     fontSize: "1.25rem",
                     fontWeight: "bold",
                     color: "#ef4444",
+                  }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card className="shadow-sm border-l-4 border-l-orange-500 bg-slate-50 dark:bg-zinc-900 dark:border-zinc-700">
+                <Statistic
+                  title={<span className="dark:text-gray-400">Rasio NPL</span>}
+                  value={nplPercentage}
+                  precision={2}
+                  suffix="%"
+                  valueStyle={{
+                    fontSize: "1.25rem",
+                    fontWeight: "bold",
+                    color: nplPercentage > 5 ? "#ef4444" : "#f97316", // Merah jika NPL tinggi, orange jika sedang
                   }}
                 />
               </Card>

@@ -1,5 +1,5 @@
 // src/components/pdfs/printSlikAnalyze.ts
-import { IFacilities, IRuleResult, ISlikResult } from "../../libs/IInterfaces";
+import { IFacilities, IRuleResult, ISlikResult } from "@syrel/shared";
 
 const formatRp = (val: number) =>
   "Rp " + Number(val || 0).toLocaleString("id-ID");
@@ -125,6 +125,12 @@ const generate = (record: ISlikResult, score: number, rules: IRuleResult[]) => {
     (a, b) => b.collect - a.collect,
   );
 
+  const totalOS = summary.total_os || 0;
+  const problemOS = facilities
+    .filter((f) => f.collect >= 3)
+    .reduce((sum, f) => sum + f.os, 0);
+  const nplPercentage = totalOS > 0 ? (problemOS / totalOS) * 100 : 0;
+
   const segmentCards = [
     {
       label: "Fasilitas Aktif",
@@ -169,7 +175,6 @@ const generate = (record: ISlikResult, score: number, rules: IRuleResult[]) => {
       <tr>
         <td>
           <div class="fac-name">${escapeHtml(f.name || "Tidak diketahui")}</div>
-          <div class="fac-condition">${escapeHtml(f.condition || "-")}</div>
           ${badges}
         </td>
         <td>
@@ -185,11 +190,17 @@ const generate = (record: ISlikResult, score: number, rules: IRuleResult[]) => {
           </div>
         </td>
         <td>
-          <span class="kol-dot" style="background:${collectInfo.color}"></span>
-          <span class="kol-text" style="color:${collectInfo.color}">${collectInfo.label}</span>
+          <div>
+            <span class="kol-dot" style="background:${collectInfo.color}"></span>
+            <span class="kol-text" style="color:${collectInfo.color}">${collectInfo.label}</span>
+          </div>
+          <div>
+            <span class="tag ${f.status ? "tag-active" : "tag-muted"}">${f.status ? "Aktif" : "Selesai"}</span>
+          </div>
         </td>
         <td>
-          <span class="tag ${f.status ? "tag-active" : "tag-muted"}">${f.status ? "Aktif" : "Selesai"}</span>
+          <div><span class="tag tag-muted">${f.interest_rate} ${f.interest_type}</span></div>
+          <div><span class="tag tag-active">${formatRp(Number((f.installment || 0).toFixed(2)))}</span></div>
         </td>
         <td class="fac-period">
           ${formatDate(f.start_at)}<br><span class="arrow">&rarr;</span> ${formatDate(f.end_at)}
@@ -503,8 +514,13 @@ const generate = (record: ISlikResult, score: number, rules: IRuleResult[]) => {
                 <div class="metric-label">Total Fasilitas</div>
                 <div class="metric-value">${summary.total_facilities} Kontrak</div>
             </div>
+            <div class="metric-card ${nplPercentage > 5 ? "danger" : "ok"}">
+                <div class="metric-label">Rasio NPL</div>
+                <div class="metric-value">${nplPercentage.toFixed(2)}%</div>
+            </div>
         </div>
     </div>
+    
 
     <!-- Segmentation -->
     <div class="section-block">
@@ -534,9 +550,9 @@ const generate = (record: ISlikResult, score: number, rules: IRuleResult[]) => {
             <thead>
                 <tr>
                     <th style="width: 27%;">Lembaga Pembiayaan / Bank</th>
-                    <th style="width: 22%;">Plafon &amp; Outstanding</th>
-                    <th style="width: 20%;">Kolektibilitas</th>
-                    <th style="width: 11%;">Status</th>
+                    <th style="width: 18%;">Plafon &amp; Outstanding</th>
+                    <th style="width: 15%;">Kol & Status</th>
+                    <th style="width: 15%;">Angsuran</th>
                     <th style="width: 20%;">Tenor Berjalan</th>
                 </tr>
             </thead>

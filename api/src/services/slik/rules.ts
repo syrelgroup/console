@@ -1,4 +1,4 @@
-import type { IRuleResult, ISlikResult } from "../../../libs/Interface.js";
+import type { IRuleResult, ISlikResult } from "@syrel/shared";
 
 export const RuleCollect = (
   data: ISlikResult,

@@ -1,5 +1,6 @@
 {
-  "dependencies": {
-    "shared": "file:../shared"
-  }
+  "name": "@syrel/shared",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "private": true
 }

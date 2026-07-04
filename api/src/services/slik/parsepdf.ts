@@ -5,7 +5,7 @@ import {
   parseDebitur,
   parseFacility,
 } from "./utils.js";
-import type { ISlikResult, ISummary } from "../../../libs/Interface.js";
+import type { ISlikResult, ISummary } from "@syrel/shared";
 
 export async function ExtractText(buffer: Buffer): Promise<ISlikResult> {
   try {

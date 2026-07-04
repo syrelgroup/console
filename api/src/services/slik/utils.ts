@@ -1,5 +1,6 @@
 import moment from "moment";
-import type { IDebitur, IFacilities } from "../../../libs/Interface.js";
+import type { IDebitur, IFacilities } from "@syrel/shared";
+import { calculateInstallment } from "./interestUtil.js";
 
 export function normalizeText(text: string) {
   return text
@@ -75,6 +76,36 @@ export function parseFacility(page: string): IFacilities {
   // Perbaikan definisi status aktif: Kondisi tidak kosong dan bukan "Lunas"
   const isAktif =
     kondisi && kondisi !== "Lunas" && kondisi !== "Dihapusbukukan";
+  const interestMatch = page.match(/Suku Bunga\/Imbalan\s+([\d.,]+)\s*%/i);
+  const interestTypeMatch = page.match(/Jenis Suku Bunga\/Imbalan\s+(.*?)\n/i);
+  const interestType =
+    interestTypeMatch?.[1]
+      .trim()
+      .replace("Suku Bunga", "")
+      .replaceAll(" ", "") || "Unknown";
+  const startAt = toDate(
+    page.match(/Tanggal Awal Kredit\s+(.*?)\s+Tunggakan/)?.[1],
+  );
+  const endAt = toDate(
+    page.match(/Tanggal Jatuh Tempo\s+(.*?)\s+Frekuensi/)?.[1],
+  );
+  const collectMatch = page.match(/Kualitas\s+(\d+)/i);
+
+  // Jika ingin mendapatkan labelnya (misal: "Lancar", "Macet")
+  // Terkadang formatnya: "Kualitas 1 - Lancar"
+  const collectLabelMatch = page.match(/Kualitas\s+\d+\s*-\s*(.*?)\n/i);
+
+  const tenorMonths =
+    startAt && endAt
+      ? (new Date(endAt).getFullYear() - new Date(startAt).getFullYear()) * 12 +
+        (new Date(endAt).getMonth() - new Date(startAt).getMonth())
+      : 0;
+  const installment = calculateInstallment(
+    toNumber(plafonMatch?.[1]),
+    parseFloat(interestMatch?.[1].replace(",", ".") || "0"),
+    tenorMonths,
+    interestType as any,
+  );
 
   return {
     name: parse.namaPelapor || "",
@@ -85,7 +116,12 @@ export function parseFacility(page: string): IFacilities {
       page.match(/Tanggal Awal Kredit\s+(.*?)\s+Tunggakan/)?.[1],
     ),
     end_at: toDate(page.match(/Tanggal Jatuh Tempo\s+(.*?)\s+Frekuensi/)?.[1]),
-    collect: Number(page.match(/Kualitas\s+(\d+)/)?.[1] ?? 0),
+    interest_rate: parseFloat(interestMatch?.[1].replace(",", ".") || "0"),
+    interest_type: interestType,
+    tenor: tenorMonths,
+    collect: collectMatch ? parseInt(collectMatch[1], 10) : 0,
+    collect_label: collectLabelMatch ? collectLabelMatch[1].trim() : "Unknown",
+    installment,
     status: !!isAktif,
   };
 }
