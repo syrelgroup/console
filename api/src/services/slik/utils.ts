@@ -168,35 +168,77 @@ export function toDate(value?: string): string | null {
   return date.isValid() ? date.format("YYYY-MM-DD") : null;
 }
 
-function parseAddress(section: string): string | null {
-  const lines = section
-    .split("\n")
-    .map((x) => x.trim())
-    .filter(Boolean);
+// function parseAddress(section: string): string | null {
+//   const lines = section
+//     .split("\n")
+//     .map((x) => x.trim())
+//     .filter(Boolean);
 
-  const idx = lines.findIndex((x) => /^Alamat/i.test(x));
+//   const idx = lines.findIndex((x) => /^Alamat/i.test(x));
 
-  if (idx === -1) return null;
+//   if (idx === -1) return null;
 
-  const result = [];
+//   const result = [];
 
-  for (let i = idx + 1; i < lines.length; i++) {
-    const line = lines[i];
+//   for (let i = idx + 1; i < lines.length; i++) {
+//     const line = lines[i];
 
-    if (
-      /^Nama Sesuai/i.test(line) ||
-      /^Pelapor/i.test(line) ||
-      /^Ringkasan/i.test(line) ||
-      /^Pekerjaan/i.test(line) ||
-      /^Lain-lain/i.test(line)
-    )
-      break;
+//     if (
+//       /^Nama Sesuai/i.test(line) ||
+//       /^Pelapor/i.test(line) ||
+//       /^Ringkasan/i.test(line) ||
+//       /^Pekerjaan/i.test(line) ||
+//       /^Lain-lain/i.test(line)
+//     )
+//       break;
 
-    // skip header tabel
-    if (/Kelurahan|Kecamatan|Kabupaten|Kode Pos|Negara/i.test(line)) continue;
+//     // skip header tabel
+//     if (/Kelurahan|Kecamatan|Kabupaten|Kode Pos|Negara/i.test(line)) continue;
 
-    result.push(line);
+//     result.push(line);
+//   }
+
+//   return result.join(" ").replace(/\s+/g, " ").trim();
+// }
+
+export function parseAddress(section: string): string | null {
+  // --- PENDEKATAN 1: Format Blok Multiline ---
+  // Berlaku jika format tabel PDF berhasil turun ke bawah (vertical)
+  const blockMatch = section.match(/Alamat([\s\S]*?)/i);
+
+  if (blockMatch) {
+    let rawAddress = blockMatch[1].replace(/\|/g, " ");
+    let lines = rawAddress
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    // Hapus baris yang hanya berisi nama header tabel
+    const headers = [
+      /^Kelurahan/i,
+      /^Kecamatan/i,
+      /^Kabupaten/i,
+      /^Kode Pos/i,
+      /^Negara/i,
+    ];
+    lines = lines.filter((line) => !headers.some((h) => h.test(line)));
+
+    const result = lines.join(" ").replace(/\s+/g, " ").trim();
+
+    // Jika hasilnya valid dan cukup panjang (bukan sisa karakter sampah), kembalikan
+    if (result.length > 10) return result;
   }
 
-  return result.join(" ").replace(/\s+/g, " ").trim();
+  // --- PENDEKATAN 2: Format Flattened / Satu Baris (Solusi untuk kasus Anda) ---
+  // Mencari awalan seperti JL, PERUM, BLOK dan berhenti saat menemukan Kode Pos / "Indonesia"
+  const regexAlamat =
+    /(?:JL\.?|JALAN|PERUM|KOMPLEKS?|KAMPUNG|KP\.?|DUSUN|GG\.?|GANG|BLOK)\b[\s\S]+?(?:\b\d{5}\b\s*Indonesia|Indonesia|\b\d{5}\b)/i;
+  const fallbackMatch = section.match(regexAlamat);
+
+  if (fallbackMatch) {
+    // Bersihkan karakter pipa (|) atau spasi ganda yang mungkin terbawa
+    return fallbackMatch[0].replace(/\|/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  return null;
 }
